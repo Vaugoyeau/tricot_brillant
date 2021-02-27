@@ -1,49 +1,66 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
 library(shiny)
+library(shiny.semantic)
+library(plotly)
 
-# Define UI for application that draws a histogram
-ui <- fluidPage(
-
-    # Application title
-    titlePanel("Old Faithful Geyser Data"),
-
-    # Sidebar with a slider input for number of bins 
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-           plotOutput("distPlot")
-        )
-    )
+ui <- shinyUI(
+  semanticPage(
+    fileInput("image_choisi", "Image à importer", width = "300px"),
+    card(
+      div(
+       class = "content", 
+       div(
+         class = "header", 
+         "Informations à remplir"
+         ),
+        numericInput("nbr_rang_10cm", "Nombre de rangs pour l'échantillon de 10 cm", value = 25, width = "400px", type = "small"),
+        numericInput("nbr_maille_10cm", "Nombre de mailles pour l'échantillon de 10 cm", value = 20, width = "400px", type = "small"),
+        numericInput("hauteur_tricot", "Hauteur du tricot à réaliser en cm", value = 20, width = "400px", type = "small"),
+        numericInput("largeur_tricot", "Largeur du tricot à réaliser en cm", value = 20, width = "400px", type = "small"),
+        # numericInput("poids_echantillon", "Poids de l'échantillon de 10 * 10 cm", value = 10, width = "400px", type = "small"),
+      )
+    ),
+    
+    h3("Image à tricoter"),
+    plotlyOutput("image_a_tricoter")#,
+    
+  #   h3("Schema à télécharger"),
+  #   action_button("image_telechargee", "Télécharger la grille")
+  
+  )
 )
 
-# Define server logic required to draw a histogram
-server <- function(input, output) {
+server <- shinyServer(function(input, output, session) {
+  
+  output$image_a_tricoter <- renderPlotly({
+    
+    if (is.null(input$image_choisi)) return(plotly::ggplotly(ggplot2::ggplot() + ggplot2::ggtitle("pas d'image chargée")))
+    
+    plotly::ggplotly(
+      tricot::knitting_image(
+        tricot::image_load(
+          input$image_choisi$datapath
+        ), 
+        tricot::grid_size(
+          input$hauteur_tricot, 
+          input$largeur_tricot, 
+          tricot::square_size(
+            input$nbr_rang_10cm,
+            input$nbr_maille_10cm
+          )
+        )
+      )
+    )
+    
+  }
+  
+  )
+  
+  
+  # observeEvent(input$image_telechargee, {
+  #           plotly::ggplotly(output$image_a_tricoter)
+  # })
+  
+})
 
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
+shiny::shinyApp(ui, server)
 
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white')
-    })
-}
-
-# Run the application 
-shinyApp(ui = ui, server = server)
