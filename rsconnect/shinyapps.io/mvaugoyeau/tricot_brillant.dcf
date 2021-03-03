@@ -5,6 +5,6 @@ account: mvaugoyeau
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3708806
-bundleId: 4279781
+bundleId: 4294660
 url: https://mvaugoyeau.shinyapps.io/tricot_brillant/
-when: 1614461776.18721
+when: 1614767216.58785
