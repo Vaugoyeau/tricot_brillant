@@ -133,13 +133,33 @@ knitting_image <- function(img, gs) {
 }
 
 
-
+myGridTemplate <- grid_template(
+  default = list(
+    areas = rbind(
+      c("telechargement", "image"),
+      c("info", "image")
+    ),
+    cols_width = c("auto", "auto"),
+    rows_height = c("100px", "auto")
+  ),
+  mobile = list(
+    areas = rbind(
+      "telechargement",
+      "info",
+      "image"
+    ),
+    rows_height = c("100px", "300px", "auto"),
+    cols_width = c("100%")
+  )
+)
 
 
 ui <- shinyUI(
   semanticPage(
-    fileInput("image_choisi", "Image à importer", width = "300px"),
-    card(
+    grid(
+      myGridTemplate,
+      telechargement = fileInput("image_choisi", "Image à importer", width = "300px"),
+      info = card(
       div(
        class = "content", 
        div(
@@ -153,14 +173,12 @@ ui <- shinyUI(
         # numericInput("poids_echantillon", "Poids de l'échantillon de 10 * 10 cm", value = 10, width = "400px", type = "small"),
       )
     ),
-    
-    h3("Image à tricoter"),
-    plotlyOutput("image_a_tricoter")
+      image = plotlyOutput("image_a_tricoter")
     # ,
     # 
     # h3("Schema à télécharger"),
     # action_button("image_telechargee", "Télécharger la grille")
-  
+    )
   )
 )
 
